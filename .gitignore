@@ -1,2 +1,6 @@
+## Node generated artifacts
 node_modules
 package-lock.json
+## Cypress generated artifacts
+reports/
+videos/
