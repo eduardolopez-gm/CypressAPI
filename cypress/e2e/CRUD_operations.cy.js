@@ -8,8 +8,8 @@ describe('CRUD operations', () => {
   })
   it('POST API testing Using Cypress ', () => {
     cy.request('POST', 'https://reqres.in/api/users', {
-      name: 'Kailash P',
-      job: 'QAAutomationLabs'
+      name: 'Eduardo Lopez',
+      job: 'QA Automation Tester'
     }).should((response) => {
       expect(response.status).to.eq(201)
     })
