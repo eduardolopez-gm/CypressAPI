@@ -1,41 +1,51 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
 name: Cypress CI
 
 on: [push]
-   
- 
+
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
-        # run 3 copies of the current job in parallel
         containers: [1, 2, 3]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      # Install NPM dependencies, cache them correctly
-      # and run all Cypress tests
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Cypress run
-        uses: cypress-io/github-action@v5
-      # after the test run completes
-      # store videos and any screenshots
-      # NOTE: screenshots will be generated only if E2E test failed
-      # thus we store screenshots only on failures
-      # Alternative: create and commit an empty cypress/screenshots folder
-      # to always have something to upload
-      - uses: actions/upload-artifact@v4
+        uses: cypress-io/github-action@v6
+        with:
+          install: false
+          command: pnpm cypress run
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots
+          name: cypress-screenshots-${{ matrix.containers }}
           path: cypress/screenshots
-      # Test run video was always captured, so this action uses "always()" condition
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cypress-videos
+          name: cypress-videos-${{ matrix.containers }}
           path: cypress/videos
